@@ -13,6 +13,6 @@ directory `lib' in your resources folder containing `python26.zip'.
 You will also need to add `include' to your header search path
 
 Known bug:
- * spaces cannot be present in path (most likely an issue with the Python Makefile
+ * spaces cannot be present in path (most likely an issue with the Python Makefile)
 
 
