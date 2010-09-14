@@ -7,10 +7,10 @@ set -o errexit
 
 # download python and patch if they aren't there
 if [[ ! -a Python-2.6.5.tar.bz2 ]]; then
-    wget http://www.python.org/ftp/python/2.6.5/Python-2.6.5.tar.bz2
+    curl http://www.python.org/ftp/python/2.6.5/Python-2.6.5.tar.bz2 > Python-2.6.5.tar.bz2
 fi
 if [[ ! -a Python-2.6.5-xcompile.patch ]]; then
-    wget http://randomsplat.com/wp-content/uploads/2010/04/Python-2.6.5-xcompile.patch
+    curl http://randomsplat.com/wp-content/uploads/2010/04/Python-2.6.5-xcompile.patch > Python-2.6.5-xcompile.patch
 fi
 
 # get rid of old build
@@ -34,8 +34,12 @@ export DEVROOT="/Developer/Platforms/iPhoneOS.platform/Developer"
 export SDKROOT="$DEVROOT/SDKs/iPhoneOS4.0.sdk"
 export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin10/4.2.1/include/ -I$SDKROOT/usr/include/"
 export CFLAGS="$CPPFLAGS -pipe -no-cpp-precomp -isysroot $SDKROOT"
-export LDFLAGS="-isysroot $SDKROOT"
+export LDFLAGS="-isysroot $SDKROOT -Lextralibs/"
 export CPP="/usr/bin/cpp $CPPFLAGS"
+
+# make a link to a differently named library for who knows what reason
+mkdir extralibs
+ln -s "$SDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib
 
 # build for iPhone
 ./configure CC="$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2" \
@@ -45,7 +49,7 @@ export CPP="/usr/bin/cpp $CPPFLAGS"
 sed -i.bak -e 's/MACHDEP_OBJS=/#&/' -e 's/LINKFORSHARED=/#&/' Makefile
 
 make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
-     CROSS_COMPILE_TARGET=yes EXTRA_CFLAGS="$CFLAS"
+     CROSS_COMPILE_TARGET=yes
 
 make install HOSTPYTHON=./hostpython CROSS_COMPILE_TARGET=yes prefix="$PWD/_install"
 
