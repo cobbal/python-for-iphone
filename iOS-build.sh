@@ -51,10 +51,7 @@ ln -s "$SDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib
 
 # build for iPhone
 ./configure CC="$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2" \
-            LD="$DEVROOT/usr/bin/ld" --host=armv6-apple-darwin --prefix=/python
-
-# comment out lines that break build (ugly hack)
-sed -i.bak -e 's/MACHDEP_OBJS=/#&/' -e 's/LINKFORSHARED=/#&/' Makefile
+            LD="$DEVROOT/usr/bin/ld" --disable-toolbox-glue --host=armv6-apple-darwin --prefix=/python
 
 make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
      CROSS_COMPILE_TARGET=yes
