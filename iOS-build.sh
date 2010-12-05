@@ -28,7 +28,18 @@ patch -p1 < ../Python-2.6.5-xcompile.patch
 
 #set up environment variables for cross compilation
 export DEVROOT="/Developer/Platforms/iPhoneOS.platform/Developer"
-export SDKROOT="$DEVROOT/SDKs/iPhoneOS4.0.sdk"
+export SDKROOT="$DEVROOT/SDKs/iPhoneOS4.1.sdk"
+
+if [ ! -d "$DEVROOT" ]; then
+    echo "DEVROOT doesn't exist. DEVROOT=$DEVROOT"
+    exit 1
+fi
+
+if [ ! -d "$SDKROOT" ]; then
+    echo "SDKROOT doesn't exist. SDKROOT=$SDKROOT"
+    exit 1
+fi
+
 export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin10/4.2.1/include/ -I$SDKROOT/usr/include/"
 export CFLAGS="$CPPFLAGS -pipe -no-cpp-precomp -isysroot $SDKROOT"
 export LDFLAGS="-isysroot $SDKROOT -Lextralibs/"
