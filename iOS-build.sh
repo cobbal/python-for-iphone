@@ -9,9 +9,6 @@ set -o errexit
 if [[ ! -a Python-2.6.5.tar.bz2 ]]; then
     curl http://www.python.org/ftp/python/2.6.5/Python-2.6.5.tar.bz2 > Python-2.6.5.tar.bz2
 fi
-if [[ ! -a Python-2.6.5-xcompile.patch ]]; then
-    curl http://randomsplat.com/wp-content/uploads/2010/04/Python-2.6.5-xcompile.patch > Python-2.6.5-xcompile.patch
-fi
 
 # get rid of old build
 rm -rf Python-2.6.5
