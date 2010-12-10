@@ -28,7 +28,7 @@ patch -p1 < ../Python-2.6.5-xcompile.patch
 
 #set up environment variables for cross compilation
 export DEVROOT="/Developer/Platforms/iPhoneOS.platform/Developer"
-export SDKROOT="$DEVROOT/SDKs/iPhoneOS4.1.sdk"
+export SDKROOT="$DEVROOT/SDKs/iPhoneOS4.2.sdk"
 
 if [ ! -d "$DEVROOT" ]; then
     echo "DEVROOT doesn't exist. DEVROOT=$DEVROOT"
@@ -58,10 +58,6 @@ make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
 
 make install HOSTPYTHON=./hostpython CROSS_COMPILE_TARGET=yes prefix="$PWD/_install"
 
-# package library files
-pushd _install/lib/python2.6
-zip -r -y python26.zip .
-popd
 pushd _install/lib
 mv libpython2.6.a libpython2.6-arm.a
 lipo -create -output libpython2.6.a ../../hostlibpython2.6.a libpython2.6-arm.a

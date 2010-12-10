@@ -6,11 +6,11 @@ The final products are located in `Python-2.6.5/_install/'
 the most interesting files for iPhone development being
  * include/
  * lib/libpython2.6.a
- * lib/python2.6/python26.zip
+ * lib/python2.6/
 
-To compile with Xcode, add libpython2.6.a to your project and create a
-directory `lib' in your resources folder containing `python26.zip'.
-You will also need to add `include' to your header search path
+To compile with Xcode, add libpython2.6.a to your project and copy the
+directory `lib' into your resources folder. You will also need to add
+`include' to your header search path.
 
 Known bug:
  * spaces cannot be present in path (most likely an issue with the Python Makefile)
