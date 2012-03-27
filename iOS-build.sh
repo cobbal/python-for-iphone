@@ -7,7 +7,7 @@ set -o errexit
 
 export IOS_VERSION="4.3"
 
-# download python and patch if they aren't there
+# download python if it isn't there
 if [[ ! -a Python-2.6.5.tar.bz2 ]]; then
     curl http://www.python.org/ftp/python/2.6.5/Python-2.6.5.tar.bz2 > Python-2.6.5.tar.bz2
 fi
