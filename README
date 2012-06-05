@@ -1,6 +1,25 @@
 Simple script to fetch, patch and build python for the iPhone and
 iPhone Simulator
 
+IMPORTANT NOTE:
+    This project never really got python running on the iPhone to my satisfaction,
+    and I can't recommend using it for any serious project at this stage.
+
+    Most notably missing is pyobjc support (which turns out to be much harder to
+    port to iPhone since it relies on more platform-specific code)
+
+    Also missing is the ability to statically compile modules, (all are currently
+    built as dylibs which works for development, but to my knowledge wouldn't be
+    allowed in the App Store)
+
+    At this point this project is mostly meant to be a starting point for anyone
+    smarter than me who wants to and can tackle the above issues.
+
+    I really wish it were practical to write apps entirely in Python, but at this
+    point it seems impossible.
+
+Last known to work on Xcode 4.3.2 SDK 5.1 (works on my machine anyway)
+
 The final products are located in `Python-2.6.5/_install/'
 
 the most interesting files for iPhone development being
