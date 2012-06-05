@@ -5,7 +5,10 @@ set -o errexit
 # http://randomsplat.com/id5-cross-compiling-python-for-embedded-linux.html
 # http://latenitesoft.blogspot.com/2008/10/iphone-programming-tips-building-unix.html
 
-export IOS_VERSION="4.3"
+export IOS_VERSION="5.1"
+export MIN_IOS_VERSION="5.0"
+
+export XCODE="/Applications/Xcode.app"
 
 # download python if it isn't there
 if [[ ! -a Python-2.6.5.tar.bz2 ]]; then
@@ -18,8 +21,9 @@ rm -rf Python-2.6.5
 # build for native machine
 tar -xjf Python-2.6.5.tar.bz2
 pushd ./Python-2.6.5
+
 CC=clang ./configure
-make python.exe Parser/pgen
+make -j 3 python.exe Parser/pgen
 
 mv python.exe hostpython
 mv Parser/pgen Parser/hostpgen
@@ -30,8 +34,9 @@ make distclean
 patch -p1 < ../Python-2.6.5-xcompile.patch
 
 # set up environment variables for simulator compilation
-export DEVROOT="/Developer/Platforms/iPhoneSimulator.platform/Developer"
+export DEVROOT="$XCODE/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer"
 export SDKROOT="$DEVROOT/SDKs/iPhoneSimulator${IOS_VERSION}.sdk"
+export IOS_COMPILER="$DEVROOT/usr/bin/llvm-gcc"
 
 if [ ! -d "$DEVROOT" ]; then
     echo "DEVROOT doesn't exist. DEVROOT=$DEVROOT"
@@ -43,15 +48,23 @@ if [ ! -d "$SDKROOT" ]; then
     exit 1
 fi
 
-export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin10/4.2.1/include/ -I$SDKROOT/usr/include/"
-export CFLAGS="$CPPFLAGS -pipe -no-cpp-precomp -isysroot $SDKROOT"
-export LDFLAGS="-isysroot $SDKROOT"
+if [ ! -f "$IOS_COMPILER" ]; then
+    echo "Error: compiler not found at $IOS_COMPILER"
+    exit 1
+fi
+
+export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$SDKROOT/usr/include/"
+export CFLAGS="$CPPFLAGS -m32 -pipe -no-cpp-precomp -isysroot $SDKROOT -miphoneos-version-min=$MIN_IOS_VERSION"
+export LDFLAGS="-isysroot $SDKROOT -static-libgcc -miphoneos-version-min=$MIN_IOS_VERSION"
 export CPP="/usr/bin/cpp $CPPFLAGS"
 
 # build for iPhone Simulator
-./configure CC="$DEVROOT/usr/bin/i686-apple-darwin10-llvm-gcc-4.2 -m32" \
-            LD="$DEVROOT/usr/bin/ld" --disable-toolbox-glue --host=i386-apple-darwin --prefix=/python
-make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
+./configure CC="$IOS_COMPILER $CFLAGS" \
+            LD="$DEVROOT/usr/bin/ld" \
+            --disable-toolbox-glue \
+            --host=i386-apple-darwin
+
+make -j 3 HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
      CROSS_COMPILE_TARGET=yes
 
 mv libpython2.6.a libpython2.6-i386.a
@@ -59,8 +72,9 @@ mv libpython2.6.a libpython2.6-i386.a
 make distclean
 
 # set up environment variables for cross compilation
-export DEVROOT="/Developer/Platforms/iPhoneOS.platform/Developer"
+export DEVROOT="$XCODE/Contents/Developer/Platforms/iPhoneOS.platform/Developer"
 export SDKROOT="$DEVROOT/SDKs/iPhoneOS${IOS_VERSION}.sdk"
+export IOS_COMPILER="$DEVROOT/usr/bin/llvm-gcc"
 
 if [ ! -d "$DEVROOT" ]; then
     echo "DEVROOT doesn't exist. DEVROOT=$DEVROOT"
@@ -72,21 +86,24 @@ if [ ! -d "$SDKROOT" ]; then
     exit 1
 fi
 
-export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin10/4.2.1/include/ -I$SDKROOT/usr/include/"
-export CFLAGS="$CPPFLAGS -pipe -no-cpp-precomp -isysroot $SDKROOT"
-export LDFLAGS="-isysroot $SDKROOT -Lextralibs/"
+if [ ! -f "$IOS_COMPILER" ]; then
+    echo "Error: compiler not found at $IOS_COMPILER"
+    exit 1
+fi
+
+export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$SDKROOT/usr/include/"
+export CFLAGS="$CPPFLAGS -pipe -no-cpp-precomp -isysroot $SDKROOT -miphoneos-version-min=$MIN_IOS_VERSION -arch armv6 -arch armv7"
+export LDFLAGS="-isysroot $SDKROOT -static-libgcc -miphoneos-version-min=$MIN_IOS_VERSION -arch armv6 -arch armv7"
 export CPP="/usr/bin/cpp $CPPFLAGS"
 
-# make a link to a differently named library for who knows what reason
-mkdir extralibs
-ln -s "$SDKROOT/usr/lib/libgcc_s.1.dylib" extralibs/libgcc_s.10.4.dylib
-
 # build for iPhone
-./configure CC="$DEVROOT/usr/bin/arm-apple-darwin10-llvm-gcc-4.2" \
-            LD="$DEVROOT/usr/bin/ld" --disable-toolbox-glue --host=armv6-apple-darwin --prefix=/python
+./configure CC="$IOS_COMPILER $CFLAGS" \
+            LD="$DEVROOT/usr/bin/ld" \
+            --disable-toolbox-glue \
+            --host=arm-apple-darwin
 
-make HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
-     CROSS_COMPILE_TARGET=yes
+make -j 3 HOSTPYTHON=./hostpython HOSTPGEN=./Parser/hostpgen \
+    CROSS_COMPILE_TARGET=yes
 
 make install HOSTPYTHON=./hostpython CROSS_COMPILE_TARGET=yes prefix="$PWD/_install"
 
