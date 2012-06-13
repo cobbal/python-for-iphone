@@ -5,7 +5,7 @@ set -o errexit
 # http://randomsplat.com/id5-cross-compiling-python-for-embedded-linux.html
 # http://latenitesoft.blogspot.com/2008/10/iphone-programming-tips-building-unix.html
 
-export MIN_IOS_VERSION="5.0"
+export MIN_IOS_VERSION=5.0
 
 # download python if it isn't there
 if [[ ! -a Python-2.6.5.tar.bz2 ]]; then
@@ -36,10 +36,9 @@ export SDKROOT=$(xcodebuild -version -sdk "$SDK" Path)
 export IOS_COMPILER=$(xcrun -find -sdk "$SDK" llvm-gcc)
 export LD=$(xcrun -find -sdk "$SDK" ld)
 
-export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$SDKROOT/usr/include/"
-export CFLAGS="$CPPFLAGS -m32 -pipe -no-cpp-precomp -isysroot $SDKROOT -miphoneos-version-min=$MIN_IOS_VERSION"
+export CFLAGS="-m32 -isysroot $SDKROOT -miphoneos-version-min=$MIN_IOS_VERSION"
 export LDFLAGS="-isysroot $SDKROOT -static-libgcc -miphoneos-version-min=$MIN_IOS_VERSION"
-export CPP="/usr/bin/cpp $CPPFLAGS"
+export CPP=$(xcrun -find -sdk "$SDK" cpp)
 
 # build for iPhone Simulator
 ./configure CC="$IOS_COMPILER $CFLAGS" \
@@ -69,10 +68,9 @@ if [ ! -f "$IOS_COMPILER" ]; then
     exit 1
 fi
 
-export CPPFLAGS="-I$SDKROOT/usr/lib/gcc/arm-apple-darwin11/4.2.1/include/ -I$SDKROOT/usr/include/"
-export CFLAGS="$CPPFLAGS -pipe -no-cpp-precomp -isysroot $SDKROOT -miphoneos-version-min=$MIN_IOS_VERSION -arch armv6 -arch armv7"
-export LDFLAGS="-isysroot $SDKROOT -static-libgcc -miphoneos-version-min=$MIN_IOS_VERSION -arch armv6 -arch armv7"
-export CPP="/usr/bin/cpp $CPPFLAGS"
+export CFLAGS="-isysroot $SDKROOT -miphoneos-version-min=$MIN_IOS_VERSION -arch armv7"
+export LDFLAGS="-isysroot $SDKROOT -static-libgcc -miphoneos-version-min=$MIN_IOS_VERSION -arch armv7"
+export CPP=$(xcrun -find -sdk "$SDK" cpp)
 
 # build for iPhone
 ./configure CC="$IOS_COMPILER $CFLAGS" \
